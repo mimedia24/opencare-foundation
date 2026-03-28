@@ -182,7 +182,7 @@ function App() {
 
       <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 md:px-6 lg:px-8">
         <section className="rounded-[22px] bg-gradient-to-r from-[#2153c9] via-[#1a3d97] to-[#5a4ff0] px-4 py-4 text-white shadow-[0_20px_60px_rgba(37,99,235,0.22)] sm:rounded-[28px] sm:px-5 sm:py-5 md:rounded-[32px] md:px-8 md:py-10">
-          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white/90 sm:text-sm md:text-2xl md:tracking-[0.18em]">
+          <p className="text-[14px] font-black uppercase tracking-[0.12em] text-white/90 sm:text-sm md:text-2xl md:tracking-[0.18em]">
             Open Care Foundation
           </p>
 
@@ -192,7 +192,7 @@ function App() {
                 Total Donation
               </h2>
               <p className="mt-2 max-w-xs text-[11px] leading-4 text-blue-100/80 sm:max-w-sm sm:text-xs md:mt-3 md:max-w-2xl md:text-base md:leading-6">
-                Publicly visible total collection with live animated count.
+                Real-time fund insights
               </p>
             </div>
 
@@ -209,17 +209,6 @@ function App() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2 md:mt-6">
-            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-semibold text-white/90 backdrop-blur-xl md:px-4 md:py-2 md:text-xs">
-              Public Fund View
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-semibold text-white/90 backdrop-blur-xl md:px-4 md:py-2 md:text-xs">
-              Real-time Summary
-            </span>
-            <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-semibold text-white/90 backdrop-blur-xl md:px-4 md:py-2 md:text-xs">
-              Glass UI
-            </span>
-          </div>
         </section>
 
         <section className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
@@ -249,6 +238,42 @@ function App() {
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+       
+          <div className="rounded-[24px] border border-slate-200 bg-gradient-to-br from-[#eef4ff] via-white to-[#f7fbff] p-4 shadow-[0_15px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[30px] md:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-xl font-black text-slate-900 sm:text-2xl">Donate</h3>
+              <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-700 md:px-4 md:py-2 md:text-[11px] md:tracking-[0.25em]">
+                Support Now
+              </span>
+            </div>
+
+            <div className="rounded-[20px] border border-white/70 bg-white/80 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[24px] md:p-5">
+              <p className="text-sm leading-6 text-slate-600">
+                Your small contribution can make a visible difference. Every donation is counted,
+                shown publicly, and reflected in the live fund summary.
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">
+                  Give
+                </span>
+                <span className="rounded-full bg-indigo-100 px-3 py-1.5 text-[11px] font-semibold text-indigo-700">
+                  Impact
+                </span>
+                <span className="rounded-full bg-sky-100 px-3 py-1.5 text-[11px] font-semibold text-sky-700">
+                  Change
+                </span>
+              </div>
+
+              <button
+                onClick={() => setShowDonateModal(true)}
+                className="mt-5 h-12 w-full rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-500 to-indigo-500 px-6 text-base font-semibold text-white shadow-[0_10px_30px_rgba(59,130,246,0.18)] transition hover:-translate-y-0.5 md:h-14 md:px-8 md:text-lg"
+              >
+                Donate Now
+              </button>
+            </div>
+          </div>
+
           <div className="rounded-[24px] border border-slate-200 bg-white/75 p-4 shadow-[0_15px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[30px] md:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-black text-slate-900 sm:text-2xl">Donor Search</h3>
@@ -316,41 +341,6 @@ function App() {
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="rounded-[24px] border border-slate-200 bg-gradient-to-br from-[#eef4ff] via-white to-[#f7fbff] p-4 shadow-[0_15px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[30px] md:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-xl font-black text-slate-900 sm:text-2xl">Donate</h3>
-              <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-700 md:px-4 md:py-2 md:text-[11px] md:tracking-[0.25em]">
-                Support Now
-              </span>
-            </div>
-
-            <div className="rounded-[20px] border border-white/70 bg-white/80 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[24px] md:p-5">
-              <p className="text-sm leading-6 text-slate-600">
-                Your small contribution can make a visible difference. Every donation is counted,
-                shown publicly, and reflected in the live fund summary.
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white">
-                  Give
-                </span>
-                <span className="rounded-full bg-indigo-100 px-3 py-1.5 text-[11px] font-semibold text-indigo-700">
-                  Impact
-                </span>
-                <span className="rounded-full bg-sky-100 px-3 py-1.5 text-[11px] font-semibold text-sky-700">
-                  Change
-                </span>
-              </div>
-
-              <button
-                onClick={() => setShowDonateModal(true)}
-                className="mt-5 h-12 w-full rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-500 to-indigo-500 px-6 text-base font-semibold text-white shadow-[0_10px_30px_rgba(59,130,246,0.18)] transition hover:-translate-y-0.5 md:h-14 md:px-8 md:text-lg"
-              >
-                Donate Now
-              </button>
-            </div>
           </div>
         </section>
 
