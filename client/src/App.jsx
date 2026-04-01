@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import donationBg from './assets/hunger-bg.jpg'
 
 function useCountUp(target, duration = 1400) {
   const [value, setValue] = useState(0)
@@ -181,34 +182,46 @@ function App() {
       `}</style>
 
       <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 md:px-6 lg:px-8">
-        <section className="rounded-[22px] bg-gradient-to-r from-[#2153c9] via-[#1a3d97] to-[#5a4ff0] px-4 py-4 text-white shadow-[0_20px_60px_rgba(37,99,235,0.22)] sm:rounded-[28px] sm:px-5 sm:py-5 md:rounded-[32px] md:px-8 md:py-10">
-          <p className="text-[14px] font-black uppercase tracking-[0.12em] text-white/90 sm:text-sm md:text-2xl md:tracking-[0.18em]">
-            Open Care Foundation
-          </p>
+        <section className="relative overflow-hidden rounded-[22px] bg-gradient-to-r from-[#2153c9] via-[#1a3d97] to-[#5a4ff0] px-4 py-4 text-white shadow-[0_20px_60px_rgba(37,99,235,0.22)] sm:rounded-[28px] sm:px-5 sm:py-5 md:rounded-[32px] md:px-8 md:py-10">
+          <img
+            src={donationBg}
+            alt="Hungry children"
+            className="absolute inset-0 h-full w-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-slate-950/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#17357f]/85 via-[#1a3d97]/72 to-[#5a4ff0]/55" />
+          <div className="absolute inset-0 backdrop-[blur(1.5px)]" />
 
-          <div className="mt-4 flex items-end justify-between gap-3 sm:gap-4 md:mt-3 md:gap-6">
-            <div className="min-w-0 flex-1">
-              <h2 className="text-[34px] font-black leading-[0.95] tracking-tight sm:text-4xl md:max-w-4xl md:text-6xl">
-                Total Donation
-              </h2>
-              <p className="mt-2 max-w-xs text-[11px] leading-4 text-blue-100/80 sm:max-w-sm sm:text-xs md:mt-3 md:max-w-2xl md:text-base md:leading-6">
-                Real-time fund insights
-              </p>
-            </div>
+          <div className="relative z-10">
+            <p className="text-[14px] font-black uppercase tracking-[0.12em] text-white/90 sm:text-sm md:text-2xl md:tracking-[0.18em]">
+              Open Care Foundation
+            </p>
 
-            <div className="w-[44%] shrink-0 rounded-[18px] border border-white/15 bg-white/10 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl sm:w-[42%] md:w-auto md:rounded-[28px] md:px-6 md:py-5">
-              <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-blue-100/70 sm:text-[9px] md:text-xs md:tracking-[0.28em]">
-                Live Collected
-              </p>
-              <div className="mt-2 flex items-end gap-1 sm:gap-1.5 md:mt-3 md:gap-2">
-                <span className="text-lg font-black sm:text-xl md:text-4xl">৳</span>
-                <span className="text-4xl font-black leading-none sm:text-5xl md:text-7xl">
-                  {animatedDonation}
-                </span>
+            <div className="mt-4 flex items-end justify-between gap-3 sm:gap-4 md:mt-3 md:gap-6">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-[34px] font-black leading-[0.95] tracking-tight sm:text-4xl md:max-w-4xl md:text-6xl">
+                  Total Donation
+                </h2>
+                <p className="mt-2 max-w-xs text-[11px] leading-4 text-blue-100/85 sm:max-w-sm sm:text-xs md:mt-3 md:max-w-2xl md:text-base md:leading-6">
+                  Real-time fund insights
+                </p>
+              </div>
+
+              <div className="w-[44%] shrink-0 rounded-[18px] border border-white/20 bg-white/12 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl sm:w-[42%] md:w-auto md:rounded-[28px] md:px-6 md:py-5">
+                <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-blue-100/80 sm:text-[9px] md:text-xs md:tracking-[0.28em]">
+                  Live Collected
+                </p>
+                <div className="mt-2 flex items-end gap-1 sm:gap-1.5 md:mt-3 md:gap-2">
+                  <span className="text-[10px] font-bold tracking-wide text-white/90 sm:text-xs md:text-base">
+                    BDT
+                  </span>
+                  <span className="text-4xl font-black leading-none sm:text-5xl md:text-7xl">
+                    {animatedDonation}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-
         </section>
 
         <section className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
@@ -217,7 +230,7 @@ function App() {
               Total Expense
             </p>
             <div className="mt-3 flex items-end gap-1.5 md:mt-4 md:gap-2">
-              <span className="text-xl font-black text-slate-500 md:text-3xl">৳</span>
+              <span className="text-[11px] font-bold tracking-wide text-slate-500 md:text-base">BDT</span>
               <span className="text-3xl font-black text-slate-900 sm:text-4xl md:text-5xl">
                 {animatedExpense}
               </span>
@@ -229,7 +242,7 @@ function App() {
               Available Fund
             </p>
             <div className="mt-3 flex items-end gap-1.5 md:mt-4 md:gap-2">
-              <span className="text-xl font-black text-slate-500 md:text-3xl">৳</span>
+              <span className="text-[11px] font-bold tracking-wide text-slate-500 md:text-base">BDT</span>
               <span className="text-3xl font-black text-slate-900 sm:text-4xl md:text-5xl">
                 {animatedFund}
               </span>
@@ -238,7 +251,6 @@ function App() {
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-       
           <div className="rounded-[24px] border border-slate-200 bg-gradient-to-br from-[#eef4ff] via-white to-[#f7fbff] p-4 shadow-[0_15px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl md:rounded-[30px] md:p-6">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h3 className="text-xl font-black text-slate-900 sm:text-2xl">Donate</h3>
@@ -313,7 +325,7 @@ function App() {
                     <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400 md:text-[11px] md:tracking-[0.28em]">
                       Total Donated
                     </p>
-                    <p className="mt-2 text-xl font-black md:mt-3 md:text-2xl">৳ {searchResult.totalDonated}</p>
+                    <p className="mt-2 text-xl font-black md:mt-3 md:text-2xl">BDT {searchResult.totalDonated}</p>
                   </div>
                 </div>
 
@@ -330,7 +342,7 @@ function App() {
                         </div>
 
                         <div className="text-left md:text-right">
-                          <p className="text-xl font-black md:text-2xl">৳ {item.amount}</p>
+                          <p className="text-xl font-black md:text-2xl">BDT {item.amount}</p>
                           <p className="text-xs capitalize text-slate-500 md:text-sm">{item.status}</p>
                         </div>
                       </div>
@@ -376,7 +388,7 @@ function App() {
 
                     <h4 className="mt-3 text-sm font-black sm:text-base">{donor.name}</h4>
                     <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">{maskPhone(donor.phone)}</p>
-                    <p className="mt-3 text-lg font-black text-indigo-600 sm:text-xl">৳ {donor.totalDonated}</p>
+                    <p className="mt-3 text-lg font-black text-indigo-600 sm:text-xl">BDT {donor.totalDonated}</p>
                   </div>
                 ))}
               </div>
@@ -416,7 +428,7 @@ function App() {
 
                     <h4 className="mt-3 text-sm font-black sm:text-base">{donation.name}</h4>
                     <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">{maskPhone(donation.phone)}</p>
-                    <p className="mt-3 text-lg font-black text-sky-600 sm:text-xl">৳ {donation.amount}</p>
+                    <p className="mt-3 text-lg font-black text-sky-600 sm:text-xl">BDT {donation.amount}</p>
                   </div>
                 ))}
               </div>
@@ -447,7 +459,7 @@ function App() {
                   </div>
 
                   <div className="text-left md:text-right">
-                    <p className="text-xl font-black text-rose-600 md:text-2xl">৳ {expense.amount}</p>
+                    <p className="text-xl font-black text-rose-600 md:text-2xl">BDT {expense.amount}</p>
                   </div>
                 </div>
               ))
