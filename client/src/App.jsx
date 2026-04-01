@@ -215,7 +215,7 @@ function App() {
                   <span className="text-[10px] font-bold tracking-wide text-white/90 sm:text-xs md:text-base">
                     BDT
                   </span>
-                  <span className="text-4xl font-black leading-none sm:text-5xl md:text-7xl">
+                  <span className="text-2xl font-black leading-none sm:text-5xl md:text-7xl">
                     {animatedDonation}
                   </span>
                 </div>
@@ -231,7 +231,7 @@ function App() {
             </p>
             <div className="mt-3 flex items-end gap-1.5 md:mt-4 md:gap-2">
               <span className="text-[11px] font-bold tracking-wide text-slate-500 md:text-base">BDT</span>
-              <span className="text-3xl font-black text-slate-900 sm:text-4xl md:text-5xl">
+              <span className="text-xl font-black text-slate-900 sm:text-4xl md:text-5xl">
                 {animatedExpense}
               </span>
             </div>
@@ -243,7 +243,7 @@ function App() {
             </p>
             <div className="mt-3 flex items-end gap-1.5 md:mt-4 md:gap-2">
               <span className="text-[11px] font-bold tracking-wide text-slate-500 md:text-base">BDT</span>
-              <span className="text-3xl font-black text-slate-900 sm:text-4xl md:text-5xl">
+              <span className="text-xl font-black text-slate-900 sm:text-4xl md:text-5xl">
                 {animatedFund}
               </span>
             </div>
