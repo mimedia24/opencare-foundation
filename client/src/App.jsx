@@ -186,7 +186,7 @@ function App() {
           <img
             src={donationBg}
             alt="Hungry children"
-            className="absolute inset-0 h-full w-full object-cover opacity-50"
+            className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
           <div className="absolute inset-0 bg-slate-950/35" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#17357f]/85 via-[#1a3d97]/72 to-[#5a4ff0]/55" />
