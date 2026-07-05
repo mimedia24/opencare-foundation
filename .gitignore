@@ -1,0 +1,12 @@
+node_modules/
+**/node_modules/
+.env
+.env.*
+**/.env
+**/.env.*
+dist/
+**/dist/
+uploads/
+server/uploads/
+admin/
+.DS_Store
