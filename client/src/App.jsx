@@ -244,7 +244,7 @@ function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) 
 }
 
 function App() {
-  const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+  const API = import.meta.env.VITE_API_BASE_URL || window.location.origin
 
   const getPageFromPath = () => {
     const path = window.location.pathname.toLowerCase()
