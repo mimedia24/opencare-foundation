@@ -7,6 +7,9 @@ import BloodPage from './pages/BloodPage'
 import ProjectsPage from './pages/ProjectsPage'
 import DonatePage from './pages/DonatePage'
 import TransparencyPage from './pages/TransparencyPage'
+import ReportPage from './pages/ReportPage'
+
+const quickAmounts = [100, 500, 1000, 2000, 5000, 10000]
 
 function useCountUp(target, duration = 1400) {
   const [value, setValue] = useState(0)
@@ -37,16 +40,16 @@ function useCountUp(target, duration = 1400) {
 }
 
 function useVisibleCards() {
-  const [visibleCards, setVisibleCards] = useState(2)
+  const [visibleCards, setVisibleCards] = useState(3)
 
   useEffect(() => {
     const updateVisibleCards = () => {
       if (window.innerWidth >= 1280) {
-        setVisibleCards(4)
+        setVisibleCards(5)
       } else if (window.innerWidth >= 768) {
-        setVisibleCards(3)
+        setVisibleCards(4)
       } else {
-        setVisibleCards(2)
+        setVisibleCards(3)
       }
     }
 
@@ -61,7 +64,7 @@ function useVisibleCards() {
   return visibleCards
 }
 
-function useAutoSlider(totalSteps, delay = 2000) {
+function useAutoSlider(totalSteps, delay = 2200) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -78,6 +81,10 @@ function useAutoSlider(totalSteps, delay = 2000) {
   }, [totalSteps, delay])
 
   return index
+}
+
+function normalize(value) {
+  return String(value || '').trim().toLowerCase()
 }
 
 function maskPhone(phone) {
@@ -195,13 +202,13 @@ function formatDate(date) {
   })
 }
 
-function Avatar({ src, name, apiBase, className = 'h-12 w-12' }) {
+function Avatar({ src, name, apiBase, className = 'h-10 w-10' }) {
   const imageUrl = makeImageUrl(apiBase, src)
   const initial = String(name || 'O').charAt(0).toUpperCase()
 
   return (
     <div
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-sm font-black text-white shadow-lg ${className}`}
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-xs font-black text-white shadow-lg ${className}`}
     >
       {imageUrl ? (
         <img src={imageUrl} alt={name || 'Profile'} className="h-full w-full object-cover" />
@@ -215,7 +222,7 @@ function Avatar({ src, name, apiBase, className = 'h-12 w-12' }) {
 function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) {
   if (!items.length) {
     return (
-      <div className="rounded-[22px] border border-slate-100 bg-slate-50 p-4 text-center text-xs font-bold text-slate-500 sm:p-5 sm:text-sm">
+      <div className="rounded-[18px] border border-slate-100 bg-slate-50 p-4 text-center text-[11px] font-bold text-slate-500">
         {emptyText}
       </div>
     )
@@ -224,7 +231,7 @@ function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) 
   const itemWidth = 100 / visibleCards
 
   return (
-    <div className="w-full min-w-0 overflow-hidden rounded-[24px]">
+    <div className="w-full min-w-0 overflow-hidden">
       <div
         className="flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${activeIndex * itemWidth}%)` }}
@@ -243,6 +250,56 @@ function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) 
   )
 }
 
+function MiniDonationCard({ item, apiBase, type = 'top', index = 0 }) {
+  const name = item.donorName || item.name || getDonationName(item)
+  const image = item.profilePhoto || getDonationImage(item)
+  const amount = type === 'top' ? item.totalDonated || item.amount || 0 : item.amount || 0
+
+  return (
+    <div className="h-[104px] min-w-0 overflow-hidden rounded-[16px] border border-slate-100 bg-white p-2 shadow-[0_8px_20px_rgba(15,23,42,0.05)] sm:h-[118px]">
+      <div className="flex min-w-0 items-center gap-1.5">
+        <Avatar src={image} name={name} apiBase={apiBase} className="h-8 w-8 sm:h-9 sm:w-9" />
+
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-center gap-1">
+            <span
+              className={`shrink-0 rounded-md px-1.5 py-0.5 text-[6px] font-black ${
+                type === 'top'
+                  ? 'bg-slate-950 text-white'
+                  : 'bg-violet-50 text-violet-700'
+              }`}
+            >
+              {type === 'top' ? `#${index + 1}` : 'New'}
+            </span>
+          </div>
+
+          <h4 className="mt-0.5 truncate text-[8px] font-black leading-tight text-slate-950 sm:text-[10px]">
+            {name}
+          </h4>
+
+          <p className="truncate text-[6.5px] font-bold text-slate-400 sm:text-[8px]">
+            {maskPhone(item.phone)}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-2 rounded-xl bg-slate-50 px-2 py-1.5">
+        <p className="text-[5.5px] font-black uppercase tracking-[0.12em] text-slate-400 sm:text-[6.5px]">
+          {type === 'top' ? 'Donated' : 'Amount'}
+        </p>
+
+        <p
+          className={`mt-0.5 truncate text-[8px] font-black sm:text-[10px] ${
+            type === 'top' ? 'text-sky-600' : 'text-violet-600'
+          }`}
+        >
+          {money(amount)}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const API = import.meta.env.VITE_API_BASE_URL || window.location.origin
 
@@ -254,6 +311,7 @@ function App() {
     if (path === '/donate') return 'donate'
     if (path === '/projects') return 'projects'
     if (path === '/transparency') return 'transparency'
+    if (path === '/reports') return 'reports'
 
     return 'home'
   }
@@ -264,6 +322,7 @@ function App() {
     if (page === 'donate') return '/donate'
     if (page === 'projects') return '/projects'
     if (page === 'transparency') return '/transparency'
+    if (page === 'reports') return '/reports'
 
     return '/'
   }
@@ -299,8 +358,14 @@ function App() {
     }
   })
 
-  const visibleCards = useVisibleCards()
+  const [homeDonate, setHomeDonate] = useState({
+    donorName: '',
+    phone: '',
+    amount: '500',
+    fundOrProject: '',
+  })
 
+  const visibleCards = useVisibleCards()
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
 
   const navigateToPage = (page) => {
@@ -346,10 +411,9 @@ function App() {
 
   const loadDashboardData = async () => {
     try {
-      const [statsData, topData, donationsData, expensesData, projectsData, categoriesData] =
+      const [statsData, donationsData, expensesData, projectsData, categoriesData] =
         await Promise.all([
           safeFetchJson(`${API}/api/stats`, {}),
-          safeFetchJson(`${API}/api/donations/top`, []),
           safeFetchJson(`${API}/api/donations`, []),
           safeFetchJson(`${API}/api/expenses`, []),
           safeFetchJson(`${API}/api/projects`, []),
@@ -361,12 +425,6 @@ function App() {
       const projectList = getArrayPayload(projectsData, 'projects')
       const categoryList = getArrayPayload(categoriesData, 'categories')
 
-      const topList = Array.isArray(topData)
-        ? topData
-        : Array.isArray(topData?.donors)
-          ? topData.donors
-          : []
-
       setStats({
         totalDonation: Number(statsData?.totalDonation || 0),
         totalExpense: Number(statsData?.totalExpense || 0),
@@ -377,7 +435,7 @@ function App() {
       setExpenses(expenseList)
       setProjects(projectList)
       setCategories(categoryList)
-      setTopDonors(topList.length > 0 ? topList : makeTopDonorsFromDonations(donationList))
+      setTopDonors(makeTopDonorsFromDonations(donationList))
     } catch (error) {
       console.log(error.message)
     }
@@ -466,71 +524,142 @@ function App() {
     loadBloodDonors()
   }, [bloodFilter.district, bloodFilter.bloodGroup])
 
+  const activeCategories = useMemo(() => {
+    const seen = new Set()
+
+    return categories.filter((category) => {
+      const status = String(category.status || 'active').toLowerCase()
+      const key = normalize(category.name || category.slug || category._id)
+
+      if (!key || seen.has(key) || status !== 'active') return false
+
+      seen.add(key)
+      return true
+    })
+  }, [categories])
+
+  const generalCategory = useMemo(() => {
+    return (
+      activeCategories.find((category) => normalize(category.name) === 'general donation') ||
+      activeCategories[0] ||
+      null
+    )
+  }, [activeCategories])
+
+  const allProjectCategory = useMemo(() => {
+    return (
+      activeCategories.find((category) => normalize(category.name) === 'all project') ||
+      activeCategories.find((category) => normalize(category.slug) === 'all-project') ||
+      generalCategory ||
+      null
+    )
+  }, [activeCategories, generalCategory])
+
+  const activeProjects = useMemo(() => {
+    return projects.filter((project) => project.status === 'active' || !project.status)
+  }, [projects])
+
+  useEffect(() => {
+    if (!generalCategory?._id) return
+
+    setHomeDonate((prev) => ({
+      ...prev,
+      fundOrProject: prev.fundOrProject || `category:${generalCategory._id}`,
+    }))
+  }, [generalCategory])
+
+  const handleHomeDonateChange = (field, value) => {
+    setHomeDonate((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleHomeQuickAmount = (amount) => {
+    setHomeDonate((prev) => ({
+      ...prev,
+      amount: String(amount),
+    }))
+  }
+
+  const handleHomeDonateSubmit = () => {
+    const phone = String(homeDonate.phone || '').trim()
+    const amount = Number(homeDonate.amount || 0)
+
+    if (!homeDonate.donorName.trim()) {
+      alert('Please write donor name.')
+      return
+    }
+
+    if (!/^01\d{9}$/.test(phone)) {
+      alert('Please write valid 11 digit mobile number.')
+      return
+    }
+
+    if (!amount || amount <= 0) {
+      alert('Please write valid donation amount.')
+      return
+    }
+
+    let selectedCategory = generalCategory
+    let selectedProject = null
+
+    if (homeDonate.fundOrProject.startsWith('category:')) {
+      const categoryId = homeDonate.fundOrProject.replace('category:', '')
+      selectedCategory =
+        activeCategories.find((category) => String(category._id) === String(categoryId)) ||
+        generalCategory
+    }
+
+    if (homeDonate.fundOrProject.startsWith('project:')) {
+      const projectId = homeDonate.fundOrProject.replace('project:', '')
+      selectedProject = activeProjects.find((project) => String(project._id) === String(projectId))
+      selectedCategory = allProjectCategory || generalCategory
+    }
+
+    localStorage.setItem(
+      'ocf_donate_draft',
+      JSON.stringify({
+        donorName: homeDonate.donorName.trim(),
+        phone,
+        amount: String(amount),
+        fundCategory: selectedCategory?._id || '',
+        project: selectedProject?._id || '',
+      })
+    )
+
+    const nextPath = selectedProject?._id
+      ? `/donate?project=${encodeURIComponent(selectedProject._id)}`
+      : selectedCategory?._id
+        ? `/donate?category=${encodeURIComponent(selectedCategory._id)}`
+        : '/donate'
+
+    setActivePage('donate')
+    window.history.pushState({}, '', nextPath)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+
   const animatedDonation = useCountUp(stats.totalDonation, 1700)
   const animatedExpense = useCountUp(stats.totalExpense, 1300)
   const animatedFund = useCountUp(stats.availableFund, 1500)
 
   const topDonorList = useMemo(() => topDonors.slice(0, 10), [topDonors])
   const recentDonations = useMemo(() => donations.slice(0, 10), [donations])
-  const recentExpenses = useMemo(() => expenses.slice(0, 5), [expenses])
+  const transparencyPreview = useMemo(() => expenses.slice(0, 4), [expenses])
 
   const runningProjects = useMemo(() => {
-    return projects.filter((project) => project.status === 'active' || !project.status).slice(0, 8)
-  }, [projects])
+    return activeProjects.slice(0, 8)
+  }, [activeProjects])
 
   const topDonorSteps = Math.max(topDonorList.length - visibleCards + 1, 1)
   const recentDonationSteps = Math.max(recentDonations.length - visibleCards + 1, 1)
 
-  const topDonorIndex = useAutoSlider(topDonorSteps, 2000)
-  const recentDonationIndex = useAutoSlider(recentDonationSteps, 2000)
-
-  const categoryExpenseSummary = useMemo(() => {
-    const map = new Map()
-
-    categories.forEach((category) => {
-      const name = category.name || category.title || category.category || ''
-      if (!name) return
-
-      map.set(name, {
-        name,
-        amount: 0,
-        count: 0,
-      })
-    })
-
-    expenses.forEach((expense) => {
-      const name = expense.category || 'General Expense'
-
-      if (!map.has(name)) {
-        map.set(name, {
-          name,
-          amount: 0,
-          count: 0,
-        })
-      }
-
-      const current = map.get(name)
-      current.amount += Number(expense.amount || 0)
-      current.count += 1
-    })
-
-    if (map.size === 0) {
-      map.set('General Expense', {
-        name: 'General Expense',
-        amount: 0,
-        count: 0,
-      })
-    }
-
-    return Array.from(map.values()).sort((a, b) => {
-      if (b.amount !== a.amount) return b.amount - a.amount
-      return a.name.localeCompare(b.name)
-    })
-  }, [categories, expenses])
-
-  const maxCategoryExpense = useMemo(() => {
-    return Math.max(...categoryExpenseSummary.map((item) => item.amount), 1)
-  }, [categoryExpenseSummary])
+  const topDonorIndex = useAutoSlider(topDonorSteps, 2200)
+  const recentDonationIndex = useAutoSlider(recentDonationSteps, 2200)
 
   const homePage = (
     <div className="grid w-full min-w-0 gap-4 overflow-hidden">
@@ -612,179 +741,177 @@ function App() {
         </div>
       </section>
 
-      <section className="relative min-w-0 overflow-hidden rounded-[28px] border border-sky-100 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-6">
-        <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-sky-100 blur-3xl" />
-        <div className="absolute -bottom-16 left-8 h-36 w-36 rounded-full bg-indigo-100 blur-3xl" />
+      <section className="overflow-hidden rounded-[24px] border border-blue-100 bg-white shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
+        <div className="relative overflow-hidden bg-[radial-gradient(circle_at_85%_20%,rgba(96,165,250,0.45),transparent_28%),linear-gradient(135deg,#020617,#172554_45%,#2563eb)] px-4 py-4 text-white">
+          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-white/10 blur-2xl motion-safe:animate-pulse" />
+          <div className="absolute right-8 top-5 h-12 w-12 rounded-full border border-white/15" />
+          <div className="absolute right-14 top-12 h-7 w-7 rounded-full border border-white/15" />
 
-        <div className="relative grid min-w-0 gap-4 md:grid-cols-[1fr_auto] md:items-center">
-          <div className="min-w-0">
-            <div className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-sky-700">
-              Support Now
-            </div>
-
-            <h3 className="mt-3 break-words text-2xl font-black tracking-[-0.04em] text-slate-950 md:text-3xl">
-              Give Hope Today
+          <div className="relative z-10">
+            <h3 className="mt-3 text-[26px] font-black leading-none tracking-[-0.05em] sm:text-4xl">
+              Donate Now
             </h3>
 
-            <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-slate-500">
-              Small help. Big impact.
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-blue-100/85 sm:text-sm">
+              Choose amount, fund or project, then continue.
             </p>
+          </div>
+        </div>
+
+        <div className="grid gap-3 p-3 sm:p-4">
+          <div className="rounded-[20px] border border-blue-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-700">
+                Quick Amount
+              </span>
+
+              <span className="rounded-full bg-white px-2 py-1 text-[8px] font-black text-blue-700">
+                Default 500
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {quickAmounts.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  onClick={() => handleHomeQuickAmount(amount)}
+                  className={`h-9 rounded-2xl text-[10px] font-black transition hover:-translate-y-1 ${
+                    Number(homeDonate.amount) === amount
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-white text-blue-700'
+                  }`}
+                >
+                  {amount.toLocaleString('en-US')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="grid gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                Donor Name
+              </span>
+
+              <input
+                type="text"
+                value={homeDonate.donorName}
+                onChange={(e) => handleHomeDonateChange('donorName', e.target.value)}
+                placeholder="Your name"
+                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                Mobile Number
+              </span>
+
+              <input
+                type="tel"
+                value={homeDonate.phone}
+                onChange={(e) =>
+                  handleHomeDonateChange('phone', e.target.value.replace(/\D/g, '').slice(0, 11))
+                }
+                placeholder="11 digit mobile number"
+                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                Amount
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                value={homeDonate.amount}
+                onChange={(e) => handleHomeDonateChange('amount', e.target.value)}
+                placeholder="500"
+                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                Fund / Project
+              </span>
+
+              <select
+                value={homeDonate.fundOrProject}
+                onChange={(e) => handleHomeDonateChange('fundOrProject', e.target.value)}
+                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              >
+                {activeCategories.length > 0 && (
+                  <optgroup label="Fund Categories">
+                    {activeCategories
+                      .filter((category) => normalize(category.name) !== 'all project')
+                      .map((category) => (
+                        <option key={category._id || category.slug} value={`category:${category._id}`}>
+                          {category.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                )}
+
+                {activeProjects.length > 0 && (
+                  <optgroup label="Active Projects">
+                    {activeProjects.map((project) => (
+                      <option key={project._id || project.slug} value={`project:${project._id}`}>
+                        Project: {project.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </label>
           </div>
 
           <button
             type="button"
-            onClick={() => navigateToPage('donate')}
-            className="group relative h-12 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 px-7 text-sm font-black text-white shadow-[0_18px_38px_rgba(37,99,235,0.25)] transition hover:-translate-y-1 md:h-13 md:w-auto"
+            onClick={handleHomeDonateSubmit}
+            className="h-11 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-5 text-sm font-black text-white shadow-[0_18px_38px_rgba(37,99,235,0.25)] transition hover:-translate-y-1"
           >
-            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition duration-700 group-hover:translate-x-full" />
-            <span className="relative">Donate Now</span>
+            Donate Now
           </button>
         </div>
       </section>
 
-      <section className="grid min-w-0 gap-4">
-        <div className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-5">
-          <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-sky-600">
-                Donor Wall
-              </p>
-              <h3 className="mt-1 truncate text-xl font-black text-slate-950 sm:text-2xl">
-                Top Donors
-              </h3>
-            </div>
+      <section className="min-w-0 rounded-[22px] border border-slate-100 bg-white p-3 shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <h3 className="truncate text-lg font-black tracking-[-0.04em] text-slate-950">
+            Top Donors
+          </h3>
 
-            <span className="shrink-0 rounded-full bg-sky-50 px-3 py-2 text-[10px] font-black text-sky-700">
-              Max 10
-            </span>
-          </div>
-
-          <SmartSlider
-            items={topDonorList}
-            activeIndex={topDonorIndex}
-            visibleCards={visibleCards}
-            emptyText="No donor data found"
-          >
-            {(donor, index) => {
-              const name = donor.donorName || donor.name || 'Donor'
-              const image = donor.profilePhoto || getDonationImage(donor)
-
-              return (
-                <div className="h-full min-w-0 rounded-[22px] border border-sky-100 bg-gradient-to-br from-white to-sky-50 p-3 shadow-sm">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Avatar
-                      src={image}
-                      name={name}
-                      apiBase={API}
-                      className="h-11 w-11 sm:h-14 sm:w-14"
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <span className="rounded-lg bg-slate-950 px-2 py-0.5 text-[8px] font-black text-white">
-                        #{index + 1}
-                      </span>
-
-                      <h4 className="mt-1 truncate text-xs font-black text-slate-950 sm:text-sm">
-                        {name}
-                      </h4>
-
-                      <p className="truncate text-[10px] font-bold text-slate-500">
-                        {maskPhone(donor.phone)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 rounded-2xl bg-white p-3 shadow-sm">
-                    <p className="text-[8px] font-black uppercase text-slate-400">Donated</p>
-                    <p className="mt-1 break-words text-sm font-black text-sky-600 sm:text-lg">
-                      {money(donor.totalDonated || donor.amount || 0)}
-                    </p>
-                  </div>
-                </div>
-              )
-            }}
-          </SmartSlider>
+          <span className="shrink-0 rounded-full bg-sky-50 px-2.5 py-1 text-[9px] font-black text-sky-700">
+            Max 10
+          </span>
         </div>
 
-        <div className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-5">
-          <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-violet-600">
-                Live Feed
-              </p>
-              <h3 className="mt-1 truncate text-xl font-black text-slate-950 sm:text-2xl">
-                Recent Donations
-              </h3>
-            </div>
-
-            <span className="shrink-0 rounded-full bg-violet-50 px-3 py-2 text-[10px] font-black text-violet-700">
-              Max 10
-            </span>
-          </div>
-
-          <SmartSlider
-            items={recentDonations}
-            activeIndex={recentDonationIndex}
-            visibleCards={visibleCards}
-            emptyText="No donations found"
-          >
-            {(donation) => {
-              const name = getDonationName(donation)
-              const image = getDonationImage(donation)
-
-              return (
-                <div className="h-full min-w-0 rounded-[22px] border border-violet-100 bg-gradient-to-br from-white to-violet-50 p-3 shadow-sm">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Avatar
-                      src={image}
-                      name={name}
-                      apiBase={API}
-                      className="h-11 w-11 sm:h-14 sm:w-14"
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[8px] font-black uppercase text-violet-500">
-                        Recent
-                      </p>
-
-                      <h4 className="mt-1 truncate text-xs font-black text-slate-950 sm:text-sm">
-                        {name}
-                      </h4>
-
-                      <p className="truncate text-[10px] font-bold text-slate-500">
-                        {maskPhone(donation.phone)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 rounded-2xl bg-white p-3 shadow-sm">
-                    <p className="text-[8px] font-black uppercase text-slate-400">Amount</p>
-                    <p className="mt-1 break-words text-sm font-black text-violet-600 sm:text-lg">
-                      {money(donation.amount)}
-                    </p>
-                  </div>
-                </div>
-              )
-            }}
-          </SmartSlider>
-        </div>
+        <SmartSlider
+          items={topDonorList}
+          activeIndex={topDonorIndex}
+          visibleCards={visibleCards}
+          emptyText="No donor data found"
+        >
+          {(donor, index) => (
+            <MiniDonationCard item={donor} apiBase={API} type="top" index={index} />
+          )}
+        </SmartSlider>
       </section>
 
-      <section className="min-w-0 rounded-[28px] border border-blue-100 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-5">
-        <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">
-              Running Projects
-            </p>
-            <h3 className="mt-1 line-clamp-2 text-xl font-black text-slate-950 sm:text-2xl">
-              Active Foundation Projects
-            </h3>
-          </div>
+      <section className="min-w-0 rounded-[22px] border border-blue-100 bg-white p-3 shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <h3 className="truncate text-lg font-black tracking-[-0.04em] text-slate-950">
+            Running Projects
+          </h3>
 
           <button
             type="button"
             onClick={() => navigateToPage('projects')}
-            className="shrink-0 rounded-full bg-blue-50 px-4 py-2 text-[10px] font-black text-blue-700 transition hover:bg-blue-100"
+            className="shrink-0 rounded-full bg-blue-50 px-3 py-1.5 text-[9px] font-black text-blue-700 transition hover:bg-blue-100"
           >
             View All
           </button>
@@ -803,9 +930,9 @@ function App() {
               return (
                 <article
                   key={project._id || project.id || project.slug}
-                  className="group w-[82vw] min-w-[82vw] snap-start overflow-hidden rounded-[24px] border border-blue-100 bg-gradient-to-br from-white to-blue-50 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(37,99,235,0.14)] sm:w-[310px] sm:min-w-[310px] lg:w-[340px] lg:min-w-[340px]"
+                  className="group w-[78vw] min-w-[78vw] snap-start overflow-hidden rounded-[20px] border border-blue-100 bg-gradient-to-br from-white to-blue-50 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(37,99,235,0.14)] sm:w-[310px] sm:min-w-[310px] lg:w-[340px] lg:min-w-[340px]"
                 >
-                  <div className="relative h-36 overflow-hidden bg-slate-100 sm:h-40">
+                  <div className="relative h-36 overflow-hidden bg-slate-100">
                     {coverImage ? (
                       <img
                         src={coverImage}
@@ -821,11 +948,11 @@ function App() {
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
 
                     <div className="absolute bottom-3 left-3 right-3 min-w-0">
-                      <span className="inline-flex max-w-full rounded-full bg-white/90 px-3 py-1 text-[9px] font-black text-blue-700 backdrop-blur">
+                      <span className="inline-flex max-w-full rounded-full bg-white/90 px-3 py-1 text-[8px] font-black text-blue-700 backdrop-blur">
                         <span className="truncate">{project.category || 'General'}</span>
                       </span>
 
-                      <h4 className="mt-2 line-clamp-2 text-lg font-black leading-tight text-white">
+                      <h4 className="mt-2 line-clamp-2 text-base font-black leading-tight text-white">
                         {project.title}
                       </h4>
                     </div>
@@ -834,33 +961,31 @@ function App() {
                   <div className="p-3">
                     <div className="grid grid-cols-3 gap-2">
                       <div className="min-w-0 rounded-xl bg-white p-2">
-                        <p className="text-[8px] font-black uppercase text-slate-400">Target</p>
-                        <p className="mt-1 truncate text-[10px] font-black text-slate-950">
+                        <p className="text-[7px] font-black uppercase text-slate-400">Target</p>
+                        <p className="mt-1 truncate text-[9px] font-black text-slate-950">
                           {money(project.targetAmount)}
                         </p>
                       </div>
 
                       <div className="min-w-0 rounded-xl bg-white p-2">
-                        <p className="text-[8px] font-black uppercase text-emerald-500">
+                        <p className="text-[7px] font-black uppercase text-emerald-500">
                           Collected
                         </p>
-                        <p className="mt-1 truncate text-[10px] font-black text-emerald-700">
+                        <p className="mt-1 truncate text-[9px] font-black text-emerald-700">
                           {money(project.collectedAmount)}
                         </p>
                       </div>
 
                       <div className="min-w-0 rounded-xl bg-white p-2">
-                        <p className="text-[8px] font-black uppercase text-rose-500">
-                          Left
-                        </p>
-                        <p className="mt-1 truncate text-[10px] font-black text-rose-700">
+                        <p className="text-[7px] font-black uppercase text-rose-500">Left</p>
+                        <p className="mt-1 truncate text-[9px] font-black text-rose-700">
                           {money(getRemaining(project))}
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-3">
-                      <div className="flex items-center justify-between text-[10px] font-black text-slate-500">
+                      <div className="flex items-center justify-between text-[9px] font-black text-slate-500">
                         <span>Progress</span>
                         <span>{progress}%</span>
                       </div>
@@ -888,107 +1013,140 @@ function App() {
         )}
       </section>
 
-      <section className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-rose-500">
-              Expense Category
-            </p>
-            <h3 className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">
-              Where Funds Are Used
-            </h3>
-          </div>
+      <section className="min-w-0 rounded-[22px] border border-slate-100 bg-white p-3 shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <h3 className="truncate text-lg font-black tracking-[-0.04em] text-slate-950">
+            Recent Donations
+          </h3>
 
-          <span className="rounded-full bg-rose-50 px-3 py-2 text-[10px] font-black text-rose-700">
-            Real
+          <span className="shrink-0 rounded-full bg-violet-50 px-2.5 py-1 text-[9px] font-black text-violet-700">
+            Max 10
           </span>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {categoryExpenseSummary.map((item) => {
-            const width = Math.max((item.amount / maxCategoryExpense) * 100, 5)
-
-            return (
-              <div key={item.name} className="min-w-0 rounded-[20px] bg-slate-50 p-3">
-                <div className="flex min-w-0 items-center justify-between gap-2">
-                  <p className="min-w-0 truncate text-xs font-black text-slate-950">
-                    {item.name}
-                  </p>
-
-                  <p className="shrink-0 text-[11px] font-black text-rose-600">
-                    {money(item.amount)}
-                  </p>
-                </div>
-
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-500 transition-all duration-700"
-                    style={{ width: `${width}%` }}
-                  />
-                </div>
-
-                <p className="mt-1.5 text-[10px] font-bold text-slate-400">
-                  {item.count} records
-                </p>
-              </div>
-            )
-          })}
-        </div>
+        <SmartSlider
+          items={recentDonations}
+          activeIndex={recentDonationIndex}
+          visibleCards={visibleCards}
+          emptyText="No donations found"
+        >
+          {(donation, index) => (
+            <MiniDonationCard item={donation} apiBase={API} type="recent" index={index} />
+          )}
+        </SmartSlider>
       </section>
 
-      <section className="min-w-0 rounded-[28px] border border-rose-100 bg-white p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] md:rounded-[34px] md:p-5">
-        <div className="mb-4 flex min-w-0 items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-rose-500">
-              Transparency
-            </p>
-            <h3 className="mt-1 truncate text-xl font-black text-slate-950 sm:text-2xl">
-              Recent Expenses
-            </h3>
-          </div>
+      <section className="min-w-0 rounded-[22px] border border-rose-100 bg-white p-3 shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+          <h3 className="truncate text-lg font-black tracking-[-0.04em] text-slate-950">
+            Transparency
+          </h3>
 
           <button
             type="button"
             onClick={() => navigateToPage('transparency')}
-            className="shrink-0 rounded-full bg-rose-50 px-4 py-2 text-[10px] font-black text-rose-700 transition hover:bg-rose-100"
+            className="shrink-0 rounded-full bg-rose-50 px-3 py-1.5 text-[9px] font-black text-rose-700 transition hover:bg-rose-100"
           >
             View All
           </button>
         </div>
 
-        <div className="grid gap-3">
-          {recentExpenses.length === 0 ? (
-            <p className="rounded-2xl bg-slate-50 p-5 text-center text-sm font-bold text-slate-500">
-              No expenses found
-            </p>
-          ) : (
-            recentExpenses.map((expense) => (
-              <button
-                key={expense._id}
-                type="button"
-                onClick={() => navigateToPage('transparency')}
-                className="grid min-w-0 gap-3 rounded-[22px] border border-slate-100 bg-slate-50 p-4 text-left transition hover:-translate-y-1 hover:bg-rose-50 sm:grid-cols-[1fr_auto] sm:items-center"
-              >
-                <div className="min-w-0">
-                  <h4 className="truncate text-sm font-black text-slate-950">{expense.title}</h4>
-                  <p className="mt-1 line-clamp-2 text-xs font-bold text-slate-500">
-                    {expense.category || 'General Expense'} · {formatDate(expense.expenseDate)}
-                  </p>
-                </div>
+        {transparencyPreview.length === 0 ? (
+          <div className="rounded-2xl bg-slate-50 p-5 text-center text-sm font-bold text-slate-500">
+            No expenses found
+          </div>
+        ) : (
+          <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {transparencyPreview.map((expense) => {
+              const imageUrl = makeImageUrl(API, expense.proofImage)
 
-                <div className="shrink-0 text-left sm:text-right">
-                  <p className="break-words text-sm font-black text-rose-600">
-                    {money(expense.amount)}
-                  </p>
-                  <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
-                    Details
-                  </p>
-                </div>
-              </button>
-            ))
-          )}
-        </div>
+              return (
+                <button
+                  key={expense._id || expense.id}
+                  type="button"
+                  onClick={() => navigateToPage('transparency')}
+                  className="group w-[46vw] min-w-[46vw] snap-start overflow-hidden rounded-[18px] border border-rose-100 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(225,29,72,0.12)] sm:w-[220px] sm:min-w-[220px] md:w-[250px] md:min-w-[250px]"
+                >
+                  <div className="relative h-24 overflow-hidden bg-slate-100 sm:h-32">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={expense.title}
+                        className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-gradient-to-br from-rose-600 to-orange-500 text-2xl font-black text-white">
+                        OCF
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
+
+                    <div className="absolute left-2 top-2 max-w-[calc(100%-16px)]">
+                      <span className="block truncate rounded-full bg-white/90 px-2 py-1 text-[7px] font-black text-rose-700 backdrop-blur">
+                        {expense.category || 'General Expense'}
+                      </span>
+                    </div>
+
+                    <div className="absolute bottom-2 left-2 right-2 text-left">
+                      <h4 className="line-clamp-2 text-[10px] font-black leading-tight text-white sm:text-xs">
+                        {expense.title}
+                      </h4>
+
+                      <p className="mt-0.5 text-[7px] font-bold text-rose-100">
+                        {formatDate(expense.expenseDate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5">
+                    <p className="text-[7px] font-black uppercase tracking-[0.12em] text-rose-500">
+                      Amount
+                    </p>
+
+                    <h4 className="mt-1 truncate text-[12px] font-black text-slate-950">
+                      {money(expense.amount)}
+                    </h4>
+
+                    <p className="mt-2 text-[9px] font-black text-slate-400">
+                      Details
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </section>
+      <section className="relative overflow-hidden rounded-[24px] border border-blue-100 bg-white p-4 shadow-[0_16px_42px_rgba(15,23,42,0.06)] sm:rounded-[28px]">
+  <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-100 blur-3xl" />
+  <div className="absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-cyan-100 blur-3xl" />
+
+  <div className="relative z-10 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+    <div>
+      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">
+        Public Report
+      </p>
+
+      <h3 className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-2xl">
+        Generate Foundation Report
+      </h3>
+
+      <p className="mt-2 text-xs font-bold leading-6 text-slate-500 sm:text-sm">
+        View donation, expense, available fund, category summary and blood donation report.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onClick={() => navigateToPage('reports')}
+      className="h-11 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-5 text-xs font-black text-white shadow-lg transition hover:-translate-y-1 sm:h-12 sm:text-sm"
+    >
+      Generate Report
+    </button>
+  </div>
+</section>
+
     </div>
   )
 
@@ -1029,6 +1187,7 @@ function App() {
         {activePage === 'transparency' && <TransparencyPage API={API} />}
         {activePage === 'blood' && bloodPage}
         {activePage === 'profile' && profilePage}
+        {activePage === 'reports' && <ReportPage API={API} />}
       </div>
 
       <BottomNav activePage={activePage} onChange={navigateToPage} />

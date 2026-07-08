@@ -12,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
 const bloodDonationRoutes = require('./routes/bloodDonationRoutes');
 const projectRoutes = require('./routes/projectRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/blood-donations', bloodDonationRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/reports', reportRoutes);
 
 const PORT = process.env.PORT || 5000;
 
