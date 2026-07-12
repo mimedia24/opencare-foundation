@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 const FOUNDATION_BKASH_NUMBER = '01749077919'
+const DONATE_DRAFT_KEY = 'ocf_donate_draft'
 
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000]
 
@@ -260,39 +261,85 @@ export default function DonatePage({ API }) {
       const params = new URLSearchParams(window.location.search)
       const queryProject = params.get('project') || ''
       const queryCategory = params.get('category') || ''
+      const shouldOpenCheckout = params.get('checkout') === '1'
+
+      let savedDraft = null
+
+      try {
+        const rawDraft = localStorage.getItem(DONATE_DRAFT_KEY)
+        savedDraft = rawDraft ? JSON.parse(rawDraft) : null
+      } catch {
+        localStorage.removeItem(DONATE_DRAFT_KEY)
+      }
+
+      const draftProject = savedDraft?.project || ''
+      const draftCategory = savedDraft?.fundCategory || ''
+
+      const requestedProject = draftProject || queryProject
+      const requestedCategory = draftCategory || queryCategory
 
       const matchedProject = projectList.find((project) => {
         return (
-          String(project._id || '') === String(queryProject) ||
-          String(project.id || '') === String(queryProject) ||
-          String(project.slug || '') === String(queryProject)
+          String(project._id || '') === String(requestedProject) ||
+          String(project.id || '') === String(requestedProject) ||
+          String(project.slug || '') === String(requestedProject)
         )
       })
 
       const matchedCategory = uniqueCategoryList.find((category) => {
         return (
-          String(category._id || '') === String(queryCategory) ||
-          String(category.slug || '') === String(queryCategory)
+          String(category._id || '') === String(requestedCategory) ||
+          String(category.slug || '') === String(requestedCategory)
         )
       })
+
+      const activeMatchedProject =
+        matchedProject && (matchedProject.status === 'active' || !matchedProject.status)
+          ? matchedProject
+          : null
+
+      const nextFundCategory = activeMatchedProject
+        ? allProjectFund?._id || defaultCategory?._id || ''
+        : matchedCategory
+          ? matchedCategory._id
+          : defaultCategory?._id || ''
+
+      const validDraft =
+        savedDraft &&
+        String(savedDraft.donorName || '').trim() &&
+        isValidPhone(savedDraft.phone) &&
+        Number(savedDraft.amount || 0) > 0
 
       setProjects(projectList)
       setCategories(uniqueCategoryList)
 
       setForm((prev) => ({
         ...prev,
-        amount: prev.amount || '500',
-        project:
-          matchedProject && (matchedProject.status === 'active' || !matchedProject.status)
-            ? matchedProject._id
-            : '',
+        donorName: validDraft
+          ? String(savedDraft.donorName).trim()
+          : prev.donorName,
+        phone: validDraft
+          ? String(savedDraft.phone).trim()
+          : prev.phone,
+        amount: validDraft
+          ? String(savedDraft.amount)
+          : prev.amount || '500',
+        project: activeMatchedProject?._id || '',
         fundCategory:
-          matchedProject && (matchedProject.status === 'active' || !matchedProject.status)
-            ? allProjectFund?._id || defaultCategory?._id || ''
-            : matchedCategory
-              ? matchedCategory._id
-              : defaultCategory?._id || prev.fundCategory || '',
+          nextFundCategory ||
+          prev.fundCategory ||
+          defaultCategory?._id ||
+          '',
+        paymentMethod: 'manual',
+        senderNumber: '',
+        paymentDone: false,
       }))
+
+      if (validDraft && shouldOpenCheckout) {
+        localStorage.removeItem(DONATE_DRAFT_KEY)
+        setErrors({})
+        setStep('payment')
+      }
     } catch (error) {
       alert(error.message)
     } finally {
@@ -512,11 +559,47 @@ export default function DonatePage({ API }) {
         throw new Error(data?.message || 'Donation submission failed.')
       }
 
+      const createdDonation =
+        data?.donation ||
+        data?.data?.donation ||
+        data?.data ||
+        {}
+
+      const donationNotice = {
+        donationId:
+          createdDonation?._id ||
+          createdDonation?.id ||
+          data?._id ||
+          data?.id ||
+          '',
+        donorName: form.donorName.trim(),
+        phone: form.phone.trim(),
+        amount: Number(form.amount || 0),
+        status:
+          createdDonation?.status ||
+          data?.status ||
+          'pending',
+        category: categoryText,
+        project: projectText,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+      }
+
+      localStorage.setItem(
+        'ocf_recent_donation',
+        JSON.stringify(donationNotice)
+      )
+
+      window.dispatchEvent(
+        new Event('ocf-donation-success')
+      )
+
       setSuccessData({
         amount: form.amount,
         donorName: form.donorName,
         category: categoryText,
         project: projectText,
+        status: donationNotice.status,
         message:
           data?.message ||
           'Thank you. Your donation has been submitted and will be verified within one day.',

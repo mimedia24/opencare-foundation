@@ -8,6 +8,7 @@ import ProjectsPage from './pages/ProjectsPage'
 import DonatePage from './pages/DonatePage'
 import TransparencyPage from './pages/TransparencyPage'
 import ReportPage from './pages/ReportPage'
+import AboutPage from './pages/AboutPage'
 
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000]
 
@@ -40,16 +41,16 @@ function useCountUp(target, duration = 1400) {
 }
 
 function useVisibleCards() {
-  const [visibleCards, setVisibleCards] = useState(3)
+  const [visibleCards, setVisibleCards] = useState(2)
 
   useEffect(() => {
     const updateVisibleCards = () => {
       if (window.innerWidth >= 1280) {
-        setVisibleCards(5)
-      } else if (window.innerWidth >= 768) {
         setVisibleCards(4)
-      } else {
+      } else if (window.innerWidth >= 768) {
         setVisibleCards(3)
+      } else {
+        setVisibleCards(2)
       }
     }
 
@@ -126,9 +127,6 @@ function getDonationName(item) {
   return item?.donorName || item?.name || 'Anonymous Donor'
 }
 
-function getDonationImage(item) {
-  return item?.profilePhoto || item?.donorPhoto || item?.photo || item?.image || item?.avatar || ''
-}
 
 function makeTopDonorsFromDonations(donations) {
   const map = new Map()
@@ -137,8 +135,6 @@ function makeTopDonorsFromDonations(donations) {
     const phone = item.phone || item.donorPhone || ''
     const name = getDonationName(item)
     const amount = Number(item.amount || 0)
-    const image = getDonationImage(item)
-
     if (!phone) return
 
     if (!map.has(phone)) {
@@ -146,16 +142,11 @@ function makeTopDonorsFromDonations(donations) {
         name,
         phone,
         totalDonated: 0,
-        profilePhoto: image,
       })
     }
 
     const current = map.get(phone)
     current.totalDonated += amount
-
-    if (!current.profilePhoto && image) {
-      current.profilePhoto = image
-    }
   })
 
   return Array.from(map.values()).sort((a, b) => b.totalDonated - a.totalDonated)
@@ -202,23 +193,6 @@ function formatDate(date) {
   })
 }
 
-function Avatar({ src, name, apiBase, className = 'h-10 w-10' }) {
-  const imageUrl = makeImageUrl(apiBase, src)
-  const initial = String(name || 'O').charAt(0).toUpperCase()
-
-  return (
-    <div
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-xs font-black text-white shadow-lg ${className}`}
-    >
-      {imageUrl ? (
-        <img src={imageUrl} alt={name || 'Profile'} className="h-full w-full object-cover" />
-      ) : (
-        initial
-      )}
-    </div>
-  )
-}
-
 function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) {
   if (!items.length) {
     return (
@@ -250,53 +224,278 @@ function SmartSlider({ items, activeIndex, visibleCards, emptyText, children }) 
   )
 }
 
-function MiniDonationCard({ item, apiBase, type = 'top', index = 0 }) {
+function MiniDonationCard({ item, type = 'top', index = 0 }) {
   const name = item.donorName || item.name || getDonationName(item)
-  const image = item.profilePhoto || getDonationImage(item)
   const amount = type === 'top' ? item.totalDonated || item.amount || 0 : item.amount || 0
 
   return (
-    <div className="h-[104px] min-w-0 overflow-hidden rounded-[16px] border border-slate-100 bg-white p-2 shadow-[0_8px_20px_rgba(15,23,42,0.05)] sm:h-[118px]">
-      <div className="flex min-w-0 items-center gap-1.5">
-        <Avatar src={image} name={name} apiBase={apiBase} className="h-8 w-8 sm:h-9 sm:w-9" />
+    <div
+      className={`group relative min-h-[76px] min-w-0 overflow-hidden rounded-[17px] border py-2.5 pl-5 pr-2.5 shadow-[0_9px_22px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(37,99,235,0.12)] sm:min-h-[84px] sm:py-3 sm:pl-6 sm:pr-3 ${
+        type === 'top'
+          ? 'border-sky-100 bg-gradient-to-br from-white via-sky-50/60 to-blue-50'
+          : 'border-violet-100 bg-gradient-to-br from-white via-violet-50/60 to-fuchsia-50'
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute left-2 top-1/2 h-9 w-1 -translate-y-1/2 rounded-full shadow-sm sm:left-2.5 sm:h-10 ${
+          type === 'top'
+            ? 'bg-gradient-to-b from-sky-400 to-blue-700'
+            : 'bg-gradient-to-b from-violet-400 to-fuchsia-600'
+        }`}
+      />
 
+      <div className="relative flex min-w-0 items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-1">
+          <div className="flex min-w-0 items-center gap-2">
             <span
-              className={`shrink-0 rounded-md px-1.5 py-0.5 text-[6px] font-black ${
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[6px] font-black uppercase tracking-[0.12em] sm:text-[7px] ${
                 type === 'top'
                   ? 'bg-slate-950 text-white'
-                  : 'bg-violet-50 text-violet-700'
+                  : 'bg-violet-600 text-white'
               }`}
             >
-              {type === 'top' ? `#${index + 1}` : 'New'}
+              {type === 'top' ? `Top ${index + 1}` : 'Recent'}
             </span>
+
+            <h4 className="min-w-0 truncate text-[10px] font-black leading-tight text-slate-950 sm:text-xs">
+              {name}
+            </h4>
           </div>
 
-          <h4 className="mt-0.5 truncate text-[8px] font-black leading-tight text-slate-950 sm:text-[10px]">
-            {name}
-          </h4>
+          <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
+            <p className="min-w-0 truncate text-[7px] font-bold tracking-wide text-slate-500 sm:text-[8px]">
+              {maskPhone(item.phone)}
+            </p>
 
-          <p className="truncate text-[6.5px] font-bold text-slate-400 sm:text-[8px]">
-            {maskPhone(item.phone)}
+            <p
+              className={`shrink-0 whitespace-nowrap text-[10px] font-black leading-none sm:text-xs ${
+                type === 'top' ? 'text-sky-700' : 'text-violet-700'
+              }`}
+            >
+              {money(amount)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+const RECENT_DONATION_KEY = 'ocf_recent_donation'
+const DONATION_NOTICE_DURATION = 24 * 60 * 60 * 1000
+
+function RecentDonationNotice({ donation, onClose }) {
+  const normalizedStatus = String(
+    donation?.status || 'pending'
+  ).toLowerCase()
+
+  const isSuccessful = [
+    'success',
+    'successful',
+    'completed',
+    'approved',
+    'verified',
+    'paid',
+  ].includes(normalizedStatus)
+
+  const isFailed = [
+    'failed',
+    'rejected',
+    'cancelled',
+    'canceled',
+  ].includes(normalizedStatus)
+
+  const statusLabel = isSuccessful
+    ? 'Success'
+    : isFailed
+      ? 'Failed'
+      : 'Pending'
+
+  const statusClass = isSuccessful
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : isFailed
+      ? 'border-rose-200 bg-rose-50 text-rose-700'
+      : 'border-amber-200 bg-amber-50 text-amber-700'
+
+  return (
+    <section className="relative overflow-hidden rounded-[20px] border border-emerald-100 bg-white p-3 shadow-[0_14px_38px_rgba(15,23,42,0.07)] sm:p-4">
+      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-100 blur-3xl" />
+
+      <div className="relative flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-lg font-black text-white shadow-lg">
+          ✓
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-[0.18em] text-emerald-600">
+                Recent Donation
+              </p>
+
+              <h3 className="mt-1 truncate text-sm font-black text-slate-950 sm:text-base">
+                Your donation was submitted
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close donation notice"
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-500 transition hover:bg-slate-200"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="min-w-0 rounded-xl bg-slate-50 px-2.5 py-2">
+              <p className="text-[7px] font-black uppercase text-slate-400">
+                Name
+              </p>
+              <p className="mt-1 truncate text-[10px] font-black text-slate-800">
+                {donation?.donorName || 'Anonymous Donor'}
+              </p>
+            </div>
+
+            <div className="min-w-0 rounded-xl bg-slate-50 px-2.5 py-2">
+              <p className="text-[7px] font-black uppercase text-slate-400">
+                Phone
+              </p>
+              <p className="mt-1 truncate text-[10px] font-black text-slate-800">
+                {maskPhone(donation?.phone)}
+              </p>
+            </div>
+
+            <div className="min-w-0 rounded-xl bg-slate-50 px-2.5 py-2">
+              <p className="text-[7px] font-black uppercase text-slate-400">
+                Amount
+              </p>
+              <p className="mt-1 truncate text-[10px] font-black text-slate-800">
+                {money(donation?.amount)}
+              </p>
+            </div>
+
+            <div className={`min-w-0 rounded-xl border px-2.5 py-2 ${statusClass}`}>
+              <p className="text-[7px] font-black uppercase opacity-70">
+                Status
+              </p>
+              <p className="mt-1 truncate text-[10px] font-black">
+                {statusLabel}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-2 text-[8px] font-bold text-slate-400">
+            This notice will automatically disappear after 24 hours.
           </p>
         </div>
       </div>
+    </section>
+  )
+}
 
-      <div className="mt-2 rounded-xl bg-slate-50 px-2 py-1.5">
-        <p className="text-[5.5px] font-black uppercase tracking-[0.12em] text-slate-400 sm:text-[6.5px]">
-          {type === 'top' ? 'Donated' : 'Amount'}
-        </p>
 
-        <p
-          className={`mt-0.5 truncate text-[8px] font-black sm:text-[10px] ${
-            type === 'top' ? 'text-sky-600' : 'text-violet-600'
-          }`}
+const SHARE_URL = 'https://opencarefoundation.org/'
+
+function FacebookShareCard() {
+  const handleFacebookShare = () => {
+    const facebookShareUrl =
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        SHARE_URL
+      )}`
+
+    const popup = window.open(
+      facebookShareUrl,
+      'facebook-share',
+      'width=720,height=650,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
+    )
+
+    if (!popup) {
+      window.location.href = facebookShareUrl
+    }
+  }
+
+  return (
+    <section className="group relative isolate overflow-hidden rounded-[22px] border border-blue-100 bg-[linear-gradient(120deg,#ffffff_0%,#f4f7ff_52%,#eef4ff_100%)] px-4 py-4 shadow-[0_16px_42px_rgba(37,99,235,0.10)] sm:px-5">
+      <div className="pointer-events-none absolute -left-10 -top-12 h-32 w-32 rounded-full bg-violet-300/25 blur-3xl motion-safe:animate-pulse" />
+      <div className="pointer-events-none absolute -bottom-14 right-8 h-32 w-32 rounded-full bg-blue-300/25 blur-3xl motion-safe:animate-pulse" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_15%,rgba(255,255,255,0.85)_45%,transparent_75%)] bg-[length:220%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-safe:group-hover:animate-[shareSweep_1.8s_ease-in-out_infinite]" />
+
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] text-blue-700 sm:text-[9px]">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 motion-safe:animate-ping" />
+            One Click. More Impact.
+          </div>
+
+          <h3 className="mt-2 text-base font-black tracking-[-0.035em] text-slate-950 sm:text-lg">
+            Share Open Care Foundation on Facebook
+          </h3>
+
+          <p className="mt-1 max-w-2xl text-[10px] font-semibold leading-5 text-slate-500 sm:text-xs">
+            Help more people discover transparent giving, live fund updates and our nationwide blood donor network.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleFacebookShare}
+          className="group/button relative inline-flex h-12 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#1877F2] px-4 text-xs font-black text-white shadow-[0_16px_34px_rgba(24,119,242,0.34)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-[#166fe5] active:scale-[0.96] motion-safe:animate-[facebookPulse_1.9s_ease-in-out_infinite] sm:px-5 sm:text-sm"
         >
-          {money(amount)}
-        </p>
+          <span className="pointer-events-none absolute -left-12 top-0 h-full w-10 -skew-x-12 bg-white/30 blur-sm motion-safe:animate-[buttonShine_2.1s_ease-in-out_infinite]" />
+
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="relative h-5 w-5 fill-current transition duration-300 group-hover/button:scale-110"
+          >
+            <path d="M13.7 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5H17V3.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1V10H8v3h2.6v8h3.1Z" />
+          </svg>
+
+          <span className="relative whitespace-nowrap">Click to Share</span>
+        </button>
       </div>
-    </div>
+
+      <style>{`
+        @keyframes facebookPulse {
+          0%, 100% {
+            transform: translateY(0) scale(1);
+            box-shadow: 0 16px 34px rgba(24, 119, 242, 0.30);
+          }
+          50% {
+            transform: translateY(-2px) scale(1.025);
+            box-shadow:
+              0 20px 44px rgba(24, 119, 242, 0.48),
+              0 0 0 7px rgba(24, 119, 242, 0.08);
+          }
+        }
+
+        @keyframes buttonShine {
+          0% { transform: translateX(-90px) skewX(-12deg); }
+          55%, 100% { transform: translateX(230px) skewX(-12deg); }
+        }
+
+        @keyframes shareSweep {
+          0% { background-position: 150% 0; }
+          100% { background-position: -100% 0; }
+        }
+
+        @media (max-width: 520px) {
+          .group > .relative.z-10 {
+            align-items: center;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+          }
+        }
+      `}</style>
+    </section>
   )
 }
 
@@ -312,6 +511,7 @@ function App() {
     if (path === '/projects') return 'projects'
     if (path === '/transparency') return 'transparency'
     if (path === '/reports') return 'reports'
+    if (path === '/about') return 'about'
 
     return 'home'
   }
@@ -323,6 +523,7 @@ function App() {
     if (page === 'projects') return '/projects'
     if (page === 'transparency') return '/transparency'
     if (page === 'reports') return '/reports'
+    if (page === 'about') return '/about'
 
     return '/'
   }
@@ -364,6 +565,15 @@ function App() {
     amount: '500',
     fundOrProject: '',
   })
+
+  const [homeDonateErrors, setHomeDonateErrors] = useState({
+    donorName: '',
+    phone: '',
+    amount: '',
+    fundOrProject: '',
+  })
+
+  const [recentDonationNotice, setRecentDonationNotice] = useState(null)
 
   const visibleCards = useVisibleCards()
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']
@@ -472,6 +682,132 @@ function App() {
   }, [])
 
   useEffect(() => {
+    let expiryTimer
+
+    const loadRecentDonationNotice = () => {
+      try {
+        const saved = localStorage.getItem(
+          RECENT_DONATION_KEY
+        )
+
+        if (!saved) {
+          setRecentDonationNotice(null)
+          return
+        }
+
+        const parsed = JSON.parse(saved)
+        const expiresAt = Number(
+          parsed?.expiresAt ||
+          Number(parsed?.createdAt || 0) +
+            DONATION_NOTICE_DURATION
+        )
+
+        if (!expiresAt || Date.now() >= expiresAt) {
+          localStorage.removeItem(
+            RECENT_DONATION_KEY
+          )
+          setRecentDonationNotice(null)
+          return
+        }
+
+        const nextNotice = {
+          ...parsed,
+          expiresAt,
+        }
+
+        setRecentDonationNotice(nextNotice)
+
+        window.clearTimeout(expiryTimer)
+
+        expiryTimer = window.setTimeout(() => {
+          localStorage.removeItem(
+            RECENT_DONATION_KEY
+          )
+          setRecentDonationNotice(null)
+        }, Math.max(expiresAt - Date.now(), 0))
+      } catch {
+        localStorage.removeItem(
+          RECENT_DONATION_KEY
+        )
+        setRecentDonationNotice(null)
+      }
+    }
+
+    const handleStorageChange = (event) => {
+      if (
+        !event?.key ||
+        event.key === RECENT_DONATION_KEY
+      ) {
+        loadRecentDonationNotice()
+      }
+    }
+
+    loadRecentDonationNotice()
+
+    window.addEventListener(
+      'ocf-donation-success',
+      loadRecentDonationNotice
+    )
+
+    window.addEventListener(
+      'storage',
+      handleStorageChange
+    )
+
+    return () => {
+      window.clearTimeout(expiryTimer)
+
+      window.removeEventListener(
+        'ocf-donation-success',
+        loadRecentDonationNotice
+      )
+
+      window.removeEventListener(
+        'storage',
+        handleStorageChange
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    const donationId =
+      recentDonationNotice?.donationId
+
+    if (!donationId || !donations.length) return
+
+    const latestDonation = donations.find(
+      (item) =>
+        String(item?._id || item?.id || '') ===
+        String(donationId)
+    )
+
+    if (!latestDonation?.status) return
+
+    const latestStatus = String(
+      latestDonation.status
+    )
+
+    if (
+      latestStatus ===
+      String(recentDonationNotice.status || '')
+    ) {
+      return
+    }
+
+    const updatedNotice = {
+      ...recentDonationNotice,
+      status: latestStatus,
+    }
+
+    localStorage.setItem(
+      RECENT_DONATION_KEY,
+      JSON.stringify(updatedNotice)
+    )
+
+    setRecentDonationNotice(updatedNotice)
+  }, [donations, recentDonationNotice])
+
+  useEffect(() => {
     const handleBrowserBackForward = () => {
       setActivePage(getPageFromPath())
     }
@@ -573,6 +909,11 @@ function App() {
       ...prev,
       [field]: value,
     }))
+
+    setHomeDonateErrors((prev) => ({
+      ...prev,
+      [field]: '',
+    }))
   }
 
   const handleHomeQuickAmount = (amount) => {
@@ -580,24 +921,47 @@ function App() {
       ...prev,
       amount: String(amount),
     }))
+
+    setHomeDonateErrors((prev) => ({
+      ...prev,
+      amount: '',
+    }))
   }
 
   const handleHomeDonateSubmit = () => {
     const phone = String(homeDonate.phone || '').trim()
     const amount = Number(homeDonate.amount || 0)
 
+    const nextErrors = {
+      donorName: '',
+      phone: '',
+      amount: '',
+      fundOrProject: '',
+    }
+
     if (!homeDonate.donorName.trim()) {
-      alert('Please write donor name.')
-      return
+      nextErrors.donorName = 'Please enter your name.'
     }
 
-    if (!/^01\d{9}$/.test(phone)) {
-      alert('Please write valid 11 digit mobile number.')
-      return
+    if (!phone) {
+      nextErrors.phone = 'Please enter your mobile number.'
+    } else if (!/^01\d{9}$/.test(phone)) {
+      nextErrors.phone = 'Enter a valid 11 digit mobile number.'
     }
 
-    if (!amount || amount <= 0) {
-      alert('Please write valid donation amount.')
+    if (!homeDonate.amount || !amount || amount <= 0) {
+      nextErrors.amount = 'Please enter a valid amount.'
+    }
+
+    if (!homeDonate.fundOrProject) {
+      nextErrors.fundOrProject = 'Please select a fund or project.'
+    }
+
+    const hasError = Object.values(nextErrors).some(Boolean)
+
+    setHomeDonateErrors(nextErrors)
+
+    if (hasError) {
       return
     }
 
@@ -629,10 +993,10 @@ function App() {
     )
 
     const nextPath = selectedProject?._id
-      ? `/donate?project=${encodeURIComponent(selectedProject._id)}`
+      ? `/donate?checkout=1&project=${encodeURIComponent(selectedProject._id)}`
       : selectedCategory?._id
-        ? `/donate?category=${encodeURIComponent(selectedCategory._id)}`
-        : '/donate'
+        ? `/donate?checkout=1&category=${encodeURIComponent(selectedCategory._id)}`
+        : '/donate?checkout=1'
 
     setActivePage('donate')
     window.history.pushState({}, '', nextPath)
@@ -641,6 +1005,13 @@ function App() {
       top: 0,
       behavior: 'smooth',
     })
+  }
+
+  const dismissRecentDonationNotice = () => {
+    localStorage.removeItem(
+      RECENT_DONATION_KEY
+    )
+    setRecentDonationNotice(null)
   }
 
   const animatedDonation = useCountUp(stats.totalDonation, 1700)
@@ -799,8 +1170,18 @@ function App() {
                 value={homeDonate.donorName}
                 onChange={(e) => handleHomeDonateChange('donorName', e.target.value)}
                 placeholder="Your name"
-                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className={`h-10 rounded-2xl border bg-slate-50 px-3 text-xs font-bold outline-none transition focus:ring-4 ${
+                  homeDonateErrors.donorName
+                    ? 'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100'
+                    : 'border-blue-100 focus:border-blue-500 focus:ring-blue-100'
+                }`}
               />
+
+              {homeDonateErrors.donorName && (
+                <span className="text-[9px] font-bold text-rose-600">
+                  {homeDonateErrors.donorName}
+                </span>
+              )}
             </label>
 
             <label className="grid gap-1.5">
@@ -815,8 +1196,18 @@ function App() {
                   handleHomeDonateChange('phone', e.target.value.replace(/\D/g, '').slice(0, 11))
                 }
                 placeholder="11 digit mobile number"
-                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className={`h-10 rounded-2xl border bg-slate-50 px-3 text-xs font-bold outline-none transition focus:ring-4 ${
+                  homeDonateErrors.phone
+                    ? 'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100'
+                    : 'border-blue-100 focus:border-blue-500 focus:ring-blue-100'
+                }`}
               />
+
+              {homeDonateErrors.phone && (
+                <span className="text-[9px] font-bold text-rose-600">
+                  {homeDonateErrors.phone}
+                </span>
+              )}
             </label>
 
             <label className="grid gap-1.5">
@@ -830,8 +1221,18 @@ function App() {
                 value={homeDonate.amount}
                 onChange={(e) => handleHomeDonateChange('amount', e.target.value)}
                 placeholder="500"
-                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className={`h-10 rounded-2xl border bg-slate-50 px-3 text-xs font-bold outline-none transition focus:ring-4 ${
+                  homeDonateErrors.amount
+                    ? 'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100'
+                    : 'border-blue-100 focus:border-blue-500 focus:ring-blue-100'
+                }`}
               />
+
+              {homeDonateErrors.amount && (
+                <span className="text-[9px] font-bold text-rose-600">
+                  {homeDonateErrors.amount}
+                </span>
+              )}
             </label>
 
             <label className="grid gap-1.5">
@@ -842,7 +1243,11 @@ function App() {
               <select
                 value={homeDonate.fundOrProject}
                 onChange={(e) => handleHomeDonateChange('fundOrProject', e.target.value)}
-                className="h-10 rounded-2xl border border-blue-100 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className={`h-10 rounded-2xl border bg-slate-50 px-3 text-xs font-bold outline-none transition focus:ring-4 ${
+                  homeDonateErrors.fundOrProject
+                    ? 'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100'
+                    : 'border-blue-100 focus:border-blue-500 focus:ring-blue-100'
+                }`}
               >
                 {activeCategories.length > 0 && (
                   <optgroup label="Fund Categories">
@@ -866,6 +1271,12 @@ function App() {
                   </optgroup>
                 )}
               </select>
+
+              {homeDonateErrors.fundOrProject && (
+                <span className="text-[9px] font-bold text-rose-600">
+                  {homeDonateErrors.fundOrProject}
+                </span>
+              )}
             </label>
           </div>
 
@@ -878,6 +1289,13 @@ function App() {
           </button>
         </div>
       </section>
+
+      {recentDonationNotice && (
+        <RecentDonationNotice
+          donation={recentDonationNotice}
+          onClose={dismissRecentDonationNotice}
+        />
+      )}
 
       <section className="min-w-0 rounded-[22px] border border-slate-100 bg-white p-3 shadow-[0_16px_42px_rgba(15,23,42,0.06)]">
         <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
@@ -897,7 +1315,7 @@ function App() {
           emptyText="No donor data found"
         >
           {(donor, index) => (
-            <MiniDonationCard item={donor} apiBase={API} type="top" index={index} />
+            <MiniDonationCard item={donor} type="top" index={index} />
           )}
         </SmartSlider>
       </section>
@@ -1031,7 +1449,7 @@ function App() {
           emptyText="No donations found"
         >
           {(donation, index) => (
-            <MiniDonationCard item={donation} apiBase={API} type="recent" index={index} />
+            <MiniDonationCard item={donation} type="recent" index={index} />
           )}
         </SmartSlider>
       </section>
@@ -1118,6 +1536,9 @@ function App() {
           </div>
         )}
       </section>
+
+      <FacebookShareCard />
+
       <section className="relative overflow-hidden rounded-[24px] border border-blue-100 bg-white p-4 shadow-[0_16px_42px_rgba(15,23,42,0.06)] sm:rounded-[28px]">
   <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-100 blur-3xl" />
   <div className="absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-cyan-100 blur-3xl" />
@@ -1188,6 +1609,7 @@ function App() {
         {activePage === 'blood' && bloodPage}
         {activePage === 'profile' && profilePage}
         {activePage === 'reports' && <ReportPage API={API} />}
+        {activePage === 'about' && (<AboutPage navigateToPage={navigateToPage} />)}
       </div>
 
       <BottomNav activePage={activePage} onChange={navigateToPage} />

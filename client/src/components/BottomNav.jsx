@@ -44,7 +44,7 @@ const navItems = [
 export default function BottomNav({ activePage = 'home', onChange }) {
   return (
     <nav className="pointer-events-none fixed bottom-3 left-0 right-0 z-[9999] flex justify-center px-3 sm:bottom-5">
-      <div className="pointer-events-auto relative grid h-[76px] w-full max-w-[500px] grid-cols-4 gap-2 rounded-[28px] border border-white/80 bg-white/85 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.18)] backdrop-blur-2xl">
+      <div className="pointer-events-auto relative grid h-[66px] w-full max-w-[500px] grid-cols-4 gap-2 rounded-[28px] border border-white/80 bg-white/85 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.18)] backdrop-blur-2xl">
         <div className="pointer-events-none absolute inset-x-8 -top-3 h-6 rounded-full bg-blue-400/20 blur-2xl" />
 
         {navItems.map((item) => {
@@ -65,12 +65,11 @@ export default function BottomNav({ activePage = 'home', onChange }) {
                 <>
                   <span className="absolute inset-0 bg-white/10" />
                   <span className="absolute -top-8 left-1/2 h-14 w-14 -translate-x-1/2 rounded-full bg-white/20 blur-xl motion-safe:animate-pulse" />
-                  
                 </>
               )}
 
               <span
-                className={`relative grid h-8 w-8 place-items-center rounded-2xl transition-all duration-300 ${
+                className={`relative grid h-7 w-8 place-items-center rounded-2xl transition-all duration-300 ${
                   isActive
                     ? 'scale-110 text-white'
                     : 'text-slate-400 group-hover:scale-110 group-hover:text-slate-800'
@@ -80,15 +79,17 @@ export default function BottomNav({ activePage = 'home', onChange }) {
               </span>
 
               <span
-                className={`relative mt-1 text-[10px] font-black leading-none transition-all duration-300 sm:text-[11px] ${
-                  isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-800'
+                className={`relative mt-0 text-[10px] font-black leading-none transition-all duration-300 sm:text-[11px] ${
+                  isActive
+                    ? 'text-white'
+                    : 'text-slate-500 group-hover:text-slate-800'
                 }`}
               >
                 {item.label}
               </span>
 
               {isActive && (
-                <span className="absolute bottom-1.5 h-1 w-7 rounded-full bg-white/80 shadow-[0_0_14px_rgba(255,255,255,0.85)]" />
+                <span className="absolute bottom-1 h-1 w-7 rounded-full bg-white/80 shadow-[0_0_14px_rgba(255,255,255,0.85)]" />
               )}
             </button>
           )
