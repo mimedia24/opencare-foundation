@@ -8,5 +8,4 @@ dist/
 **/dist/
 uploads/
 server/uploads/
-admin/
 .DS_Store
